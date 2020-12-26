@@ -1,0 +1,125 @@
+﻿@page "/"
+
+
+<h3>Yıl başı Çekişi</h3>
+
+<h3>Kullanım Kılavuzu</h3>
+<ul>
+    <li>İsim + Enter :D</li>
+</ul>
+<textarea class="form-control" style="height:200px; " @bind="allNames">
+</textarea>
+
+<label class="text-danger">@errorMessage</label>
+@if (isShow)
+{
+    <table class="table table-responsive-lg">
+        <thead>
+            <tr class="text-center">
+                <th>Hediye Veren</th>
+                <th>Hediye Alan</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var item in keyValuePairs)
+            {
+                <tr class="text-center">
+                    <td>@item.Key</td>
+                    <td>@item.Value</td>
+                </tr>
+            }
+
+        </tbody>
+    </table>
+}
+
+
+
+<button class="btn btn-block" @onclick="Mathing">Eşleştirmeyi başlat</button>
+@code {
+    Dictionary<string, string> keyValuePairs = new Dictionary<string, string>();
+    string allNames;
+    string errorMessage = string.Empty;
+    List<int> randomArray = new List<int>();
+    bool isShow = false;
+
+    private void Mathing()
+    {
+        if (!string.IsNullOrEmpty(allNames))
+        {
+            randomArray = new List<int>();
+            keyValuePairs = new Dictionary<string, string>();
+            errorMessage = string.Empty;
+            List<string> arrayName = allNames.Split('\n').ToList();
+            for (int i = 0; i < arrayName.Count; i++)
+            {
+                if (string.IsNullOrEmpty(arrayName[i]))
+                    arrayName.RemoveAt(i);
+                var sameNames = arrayName.Where(w => w.Equals(arrayName[i])).ToList();
+
+                if (sameNames.Count > 1)
+                {
+                    sameNames.ForEach(name =>
+                    {
+
+                        int index = arrayName.IndexOf(name);
+                        arrayName[index] = string.Format($"Listede {arrayName.IndexOf(name) + 1}. Sırada ki {arrayName[index]}");
+
+                    });
+                }
+
+            }
+            if (arrayName.Count % 2 != 0)
+            {
+                isShow = false;
+                errorMessage = string.Format($"Hadi diyelim eşledim sence {arrayName.Count} kişi eşit dağıtılır mı bir kişi açıkta mı kalır? cevabını dinliyorum microfonunu aktif ettim şu an.");
+                //return;
+            }
+            else
+            {
+                isShow = true;
+            }
+            if (isShow)
+            {
+                while (keyValuePairs.Count != arrayName.Count)
+                {
+                    int firstForNumber = RandomNumber(arrayName.Count);
+                    string first = arrayName[firstForNumber];
+                    int secondForNumber = RandomNumber(arrayName.Count);
+                    string second = arrayName[secondForNumber];
+                    if (!keyValuePairs.ContainsKey(first) && !first.Equals(second))
+                    {
+                        if (!keyValuePairs.ContainsValue(second))
+                            keyValuePairs.Add(first, second);
+                        else
+                            continue;
+
+                    }
+
+                }
+
+            }
+        }
+
+
+
+
+
+
+    }
+    private int RandomNumber(int arrayLength)
+    {
+        Random random = new Random();
+
+        while (true)
+        {
+            int rndNumber = random.Next(0, arrayLength);
+            if (randomArray.IndexOf(rndNumber) < 0)
+                return rndNumber;
+        }
+
+    }
+
+
+}
